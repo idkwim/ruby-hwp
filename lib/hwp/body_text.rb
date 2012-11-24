@@ -1,4 +1,23 @@
 # coding: utf-8
+#
+# body_text.rb
+#
+# Copyright (C) 2010-2012  Hodong Kim <cogniti@gmail.com>
+# 
+# ruby-hwp is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# ruby-hwp is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# 한글과컴퓨터의 한/글 문서 파일(.hwp) 공개 문서를 참고하여 개발하였습니다.
 
 require 'hwp/utils'
 require 'pp'
@@ -52,52 +71,52 @@ module Record::Section
                 end
 
                 case context.tag_id
-                when :HWPTAG_PARA_TEXT
+                when HWPTAG::PARA_TEXT
                     @para_text = ParaText.new(context)
-                when :HWPTAG_PARA_CHAR_SHAPE
+                when HWPTAG::PARA_CHAR_SHAPE
                     @para_char_shapes << ParaCharShape.new(context)
-                when :HWPTAG_PARA_LINE_SEG
+                when HWPTAG::PARA_LINE_SEG
                     @para_line_segs << ParaLineSeg.new(context)
-                when :HWPTAG_CTRL_HEADER
+                when HWPTAG::CTRL_HEADER
                     @ctrl_headers << CtrlHeader.new(context)
-                #when :HWPTAG_MEMO_LIST
+                #when HWPTAG::MEMO_LIST
                 #    # TODO
-                # table, memo_list 에서 HWPTAG_LIST_HEADER 가 온다.
-                #when :HWPTAG_LIST_HEADER
+                # table, memo_list 에서 HWPTAG::LIST_HEADER 가 온다.
+                #when HWPTAG::LIST_HEADER
                 #    if context.level <= @level
                 #        context.stack << context.tag_id
                 #        break
                 #    else
                 #        #raise "unhandled " + context.tag_id.to_s
                 #    end
-                # HWPTAG_SHAPE_COMPONENT
-                #  HWPTAG_LIST_HEADER
-                #  HWPTAG_PARA_HEADER
-                #   HWPTAG_PARA_TEXT
-                #   HWPTAG_PARA_CHAR_SHAPE
-                #   HWPTAG_PARA_LINE_SEG
-                #  HWPTAG_SHAPE_COMPONENT_RECTANGLE
-                #when :HWPTAG_SHAPE_COMPONENT_RECTANGLE
+                # HWPTAG::SHAPE_COMPONENT
+                #  HWPTAG::LIST_HEADER
+                #  HWPTAG::PARA_HEADER
+                #   HWPTAG::PARA_TEXT
+                #   HWPTAG::PARA_CHAR_SHAPE
+                #   HWPTAG::PARA_LINE_SEG
+                #  HWPTAG::SHAPE_COMPONENT_RECTANGLE
+                #when HWPTAG::SHAPE_COMPONENT_RECTANGLE
                 #    if context.level <= @level
                 #        context.stack << context.tag_id
                 #        break
                 #    else
                 #        raise "unhandled " + context.tag_id.to_s
                 #    end
-                #when :UNKNOWN_TAG_0
-                #when :UNKNOWN_TAG_4
-                #when :UNKNOWN_TAG_172
-                #when :UNKNOWN_TAG_190
-                #when :UNKNOWN_TAG_199
-                #when :UNKNOWN_TAG_257
-                #when :UNKNOWN_TAG_288
-                #when :UNKNOWN_TAG_512
-                #when :UNKNOWN_TAG_520
-                #when :UNKNOWN_TAG_560
-                #when :UNKNOWN_TAG_652
-                #when :UNKNOWN_TAG_710
-                #when :UNKNOWN_TAG_888
-                #when :HWPTAG_DOC_INFO_16
+                #when HWPTAG::UNKNOWN_TAG_0
+                #when HWPTAG::UNKNOWN_TAG_4
+                #when HWPTAG::UNKNOWN_TAG_172
+                #when HWPTAG::UNKNOWN_TAG_190
+                #when HWPTAG::UNKNOWN_TAG_199
+                #when HWPTAG::UNKNOWN_TAG_257
+                #when HWPTAG::UNKNOWN_TAG_288
+                #when HWPTAG::UNKNOWN_TAG_512
+                #when HWPTAG::UNKNOWN_TAG_520
+                #when HWPTAG::UNKNOWN_TAG_560
+                #when HWPTAG::UNKNOWN_TAG_652
+                #when HWPTAG::UNKNOWN_TAG_710
+                #when HWPTAG::UNKNOWN_TAG_888
+                #when HWPTAG::DOC_INFO_32
                 else
                     raise "unhandled " + context.tag_id.to_s
                 end
@@ -116,12 +135,6 @@ module Record::Section
             desc = Pango::FontDescription.new("Sans 10")
             pango_context.load_font(desc)
 
-            unless @ctrl_headers.empty?
-                @ctrl_headers.each do |ctrl|
-                    pp ctrl
-                end
-            end
-
             layout = Pango::Layout.new pango_context
             layout.width = (page_def.width - page_def.left_margin - page_def.
                 right_margin) / 100.0 * Pango::SCALE
@@ -132,7 +145,7 @@ module Record::Section
         end
 
         def to_tag
-            "HWPTAG_PARA_HEADER"
+            "HWPTAG::PARA_HEADER"
         end
 
         def debug
@@ -199,7 +212,7 @@ module Record::Section
         end
 
         def to_tag
-            "HWPTAG_PARA_TEXT"
+            "HWPTAG::PARA_TEXT"
         end
 
         def debug
@@ -221,7 +234,7 @@ module Record::Section
         end
 
         def to_tag
-            "HWPTAG_PARA_CHAR_SHAPE"
+            "HWPTAG::PARA_CHAR_SHAPE"
         end
 
         def debug
@@ -241,7 +254,7 @@ module Record::Section
         end
 
         def to_tag
-            "HWPTAG_PARA_LINE_SEG"
+            "HWPTAG::PARA_LINE_SEG"
         end
 
         def debug
@@ -274,8 +287,6 @@ module Record::Section
 
             @section_defs, @list_headers, @para_headers = [], [], []
             @tables, @eq_edits = [], []
-
-            puts(" " * level + "\"#{@ctrl_id}\"")
 
             common = ['tbl ','$lin','$rec','$ell','$arc','$pol',
                       '$cur','eqed','$pic','$ole','$con']
@@ -427,7 +438,7 @@ module Record::Section
         private :parse
 
         def to_tag
-            "HWPTAG_CTRL_HEADER"
+            "HWPTAG::CTRL_HEADER"
         end
 
         def debug
@@ -462,7 +473,7 @@ module Record::Section
         end
 
         def to_tag
-            "HWPTAG_LIST_HEADER"
+            "HWPTAG::LIST_HEADER"
         end
 
         def debug
@@ -605,7 +616,7 @@ module Record::Section
         end
 
         def to_tag
-            "HWPTAG_PAGE_DEF"
+            "HWPTAG::PAGE_DEF"
         end
 
         def debug
@@ -637,7 +648,7 @@ module Record::Section
         end
 
         def to_tag
-            "HWPTAG_FOOTNOTE_SHAPE"
+            "HWPTAG::FOOTNOTE_SHAPE"
         end
 
         def debug
@@ -654,7 +665,7 @@ module Record::Section
         end
 
         def to_tag
-            "HWPTAG_PAGE_BORDER_FILL"
+            "HWPTAG::PAGE_BORDER_FILL"
         end
 
         def debug

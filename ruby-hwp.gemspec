@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
 	spec.name = PKG_NAME
 	spec.version = PKG_VERSION
 	spec.summary = 'Ruby HWP library'
-	spec.description = 'A library for easy read access to HWP documents for Ruby, 한글과컴퓨터의 글 문서 파일(.hwp) 공개 문서를 참고하여 개발하였습니다.'
+	spec.description = 'A library for easy read access to HWP documents for Ruby, 한글과컴퓨터의 한/글 문서 파일(.hwp) 공개 문서를 참고하여 개발하였습니다.'
 
 	spec.required_ruby_version = '>= 1.9.1'
 	spec.requirements << 'ruby-ole 1.2.9 or higher'
@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
 	spec.files  = ['README.rdoc', 'Rakefile', 'ruby-hwp.gemspec'] +
 	spec.files += Dir.glob('lib/**/*.rb')
 	spec.files += Dir.glob('bin/*')
-	spec.executables = ['hwp2txt', 'hwp2html', 'hv']
+	spec.executables = ['hv', 'hwp2html', 'hwp2pdf', 'hwp2txt']
 
 	spec.has_rdoc = false
 

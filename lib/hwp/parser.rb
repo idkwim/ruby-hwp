@@ -1,5 +1,23 @@
 # coding: utf-8
-# 한글과컴퓨터의 글 문서 파일(.hwp) 공개 문서를 참고하여 개발하였습니다.
+#
+# parser.rb
+#
+# Copyright (C) 2010-2012  Hodong Kim <cogniti@gmail.com>
+# 
+# ruby-hwp is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# ruby-hwp is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# 한글과컴퓨터의 한/글 문서 파일(.hwp) 공개 문서를 참고하여 개발하였습니다.
 
 require 'hwp/tags.rb'
 
@@ -19,13 +37,11 @@ module HWP
 
         def record_header_decode
             l = (@stream.read 4).unpack("V")[0]
-            @tag_id = HWPTAGS[l & 0x3ff]
-            raise "unknown tag_id = #{l & 0x3ff}" if @tag_id.nil?
+            @tag_id = l & 0x3ff
             @level  = (l >> 10) & 0x3ff
             size    = (l >> 20) & 0xfff
 
             @data = @stream.read size
-            puts " " * @level + @tag_id.to_s
         end
 
         def pull
@@ -49,13 +65,13 @@ module HWP
                     # stack 이 차 있으면 자식으로부터 제어를 넘겨받은 것이다.
                     context.stack.empty? ? context.pull : context.stack.pop
 
-                    if context.tag_id == :HWPTAG_PARA_HEADER and context.level == 0
+                    if context.tag_id == HWPTAG::PARA_HEADER and context.level == 0
                         @paragraphs << Record::Section::ParaHeader.new(context)
                     else
                         # FIXME UNKNOWN_TAG 때문에...
                         @paragraphs << Record::Section::ParaHeader.new(context)
-                        # FIXME 최상위 태그가 :HWPTAG_PARA_HEADER 가 아닐 수도 있다.
-                        puts "최상위 태그가 HWPTAG_PARA_HEADER 이 아닌 것 같음"
+                        # FIXME 최상위 태그가 HWPTAG::PARA_HEADER 가 아닐 수도 있다.
+                        puts "최상위 태그가 HWPTAG::PARA_HEADER 이 아닌 것 같음"
                         # FIXME UNKNOWN_TAG 때문에.......
                         #raise "unhandled: #{context.tag_id}"
                     end

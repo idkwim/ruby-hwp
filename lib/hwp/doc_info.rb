@@ -1,3 +1,24 @@
+# coding: utf-8
+#
+# doc_info.rb
+#
+# Copyright (C) 2010-2012  Hodong Kim <cogniti@gmail.com>
+# 
+# ruby-hwp is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# ruby-hwp is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# 한글과컴퓨터의 한/글 문서 파일(.hwp) 공개 문서를 참고하여 개발하였습니다.
+
 require 'zlib'
 
 module Record
@@ -15,19 +36,19 @@ module Record
                 context.stack.empty? ? context.pull : context.stack.pop
 
                 case context.tag_id
-                when :HWPTAG_DOCUMENT_PROPERTIES
+                when HWPTAG::DOCUMENT_PROPERTIES
                     @document_properties =
                         Record::DocInfo::DocumentProperties.new(context)
-                when :HWPTAG_ID_MAPPINGS
+                when HWPTAG::ID_MAPPINGS
                     @id_mappings = Record::DocInfo::IDMappings.new(context)
-                when :HWPTAG_DOC_DATA
+                when HWPTAG::DOC_DATA
                     @doc_data << Record::DocInfo::DocData.new(context)
-                when :HWPTAG_DISTRIBUTE_DOC_DATA
+                when HWPTAG::DISTRIBUTE_DOC_DATA
                     @distribute_doc_data <<
                         Record::DocInfo::DistributeDocData.new(context)
-                when :RESERVED
+                when HWPTAG::RESERVED_29, HWPTAG::RESERVED_89
                     @reserved << Record::DocInfo::Reserved.new(context)
-                when :HWPTAG_COMPATIBLE_DOCUMENT
+                when HWPTAG::COMPATIBLE_DOCUMENT
                     @compatible_document <<
                         Record::DocInfo::CompatibleDocument.new(context)
                 else
@@ -97,27 +118,27 @@ module Record
                 end
 
                 case context.tag_id
-                when :HWPTAG_BIN_DATA
+                when HWPTAG::BIN_DATA
                     @bin_data << Record::DocInfo::BinData.new(context)
-                when :HWPTAG_FACE_NAME
+                when HWPTAG::FACE_NAME
                     @face_names << Record::DocInfo::FaceName.new(context)
-                when :HWPTAG_BORDER_FILL
+                when HWPTAG::BORDER_FILL
                     @border_fill << Record::DocInfo::BorderFill.new(context)
-                when :HWPTAG_CHAR_SHAPE
+                when HWPTAG::CHAR_SHAPE
                     @char_shapes << Record::DocInfo::CharShape.new(context)
-                when :HWPTAG_TAB_DEF
+                when HWPTAG::TAB_DEF
                     @tab_defs << Record::DocInfo::TabDef.new(context)
-                when :HWPTAG_NUMBERING
+                when HWPTAG::NUMBERING
                     @numbering << Record::DocInfo::Numbering.new(context)
-                when :HWPTAG_BULLET
+                when HWPTAG::BULLET
                     @bullet << Record::DocInfo::Bullet.new(context)
-                when :HWPTAG_PARA_SHAPE
+                when HWPTAG::PARA_SHAPE
                     @para_shapes << Record::DocInfo::ParaShape.new(context)
-                when :HWPTAG_STYLE
+                when HWPTAG::STYLE
                     @styles << Record::DocInfo::Style.new(context)
-                when :HWPTAG_MEMO_SHAPE
+                when HWPTAG::MEMO_SHAPE
                     # TODO
-                when :HWPTAG_FORBIDDEN_CHAR
+                when HWPTAG::FORBIDDEN_CHAR
                     # TODO DOC_DATA뿐만 아니라 IDMappings 에서도 나온다.
                     # 혹시 모르니 DOC_DATA에 FORBIDDEN_CHAR이 나오는지 재확인
                 else
@@ -837,7 +858,7 @@ module Record
                 end
 
                 case context.tag_id
-                when :HWPTAG_FORBIDDEN_CHAR
+                when HWPTAG::FORBIDDEN_CHAR
                     @forbidden_char <<
                         Record::DocInfo::ForbiddenChar.new(context)
                 else
@@ -886,10 +907,10 @@ module Record
                 end
 
                 case context.tag_id
-                when :HWPTAG_LAYOUT_COMPATIBILITY
+                when HWPTAG::LAYOUT_COMPATIBILITY
                     @layout_compatibility <<
                         Record::DocInfo::LayoutCompatibility.new(context)
-                when :HWPTAG_DOC_INFO_16 # 레이아웃 관련 태그로 추정됨.
+                when HWPTAG::DOC_INFO_32 # 레이아웃 관련 태그로 추정됨.
                     # TODO
                 else
                     raise "unhandled " + context.tag_id.to_s

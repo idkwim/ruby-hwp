@@ -1,5 +1,23 @@
 # coding: utf-8
-# 한글과컴퓨터의 글 문서 파일(.hwp) 공개 문서를 참고하여 개발하였습니다.
+#
+# model.rb
+#
+# Copyright (C) 2010-2012  Hodong Kim <cogniti@gmail.com>
+# 
+# ruby-hwp is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# ruby-hwp is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# 한글과컴퓨터의 한/글 문서 파일(.hwp) 공개 문서를 참고하여 개발하였습니다.
 
 require 'hwp/utils.rb'
 
@@ -25,15 +43,15 @@ module HWP
                     end
 
                     case context.tag_id
-                    when :HWPTAG_CTRL_DATA
+                    when HWPTAG::CTRL_DATA
                         # TODO
-                    when :HWPTAG_PAGE_DEF
+                    when HWPTAG::PAGE_DEF
                         @page_defs << Record::Section::
                             PageDef.new(context)
-                    when :HWPTAG_FOOTNOTE_SHAPE
+                    when HWPTAG::FOOTNOTE_SHAPE
                         @footnote_shapes << Record::Section::
                             FootnoteShape.new(context)
-                    when :HWPTAG_PAGE_BORDER_FILL
+                    when HWPTAG::PAGE_BORDER_FILL
                         @page_border_fills << Record::Section::
                             PageBorderFill.new(context)
                     else
@@ -80,11 +98,11 @@ module HWP
                     end
 
                     case context.tag_id
-                    when :HWPTAG_CTRL_HEADER
+                    when HWPTAG::CTRL_HEADER
                         # CTRL_HEADER 가 끝이 나고 새롭게 시작됨을 알린다.
                         context.stack << context.tag_id
                         break
-                    when :HWPTAG_PARA_HEADER
+                    when HWPTAG::PARA_HEADER
                         if context.level <= @level
                             context.stack << context.tag_id
                             break
@@ -95,7 +113,7 @@ module HWP
                                 ParaHeader.new(context)
                             @ctrl_header.para_headers << para_header
                         end
-                    when :HWPTAG_LIST_HEADER
+                    when HWPTAG::LIST_HEADER
                         hierarchy_check(@level, context.level, __LINE__)
                         @ctrl_header.list_headers << Record::Section::
                             ListHeader.new(context)
@@ -122,11 +140,11 @@ module HWP
                     end
 
                     case context.tag_id
-                    when :HWPTAG_CTRL_HEADER
+                    when HWPTAG::CTRL_HEADER
                         # CTRL_HEADER 가 끝이 나고 새롭게 시작됨을 알린다.
                         context.stack << context.tag_id
                         break
-                    when :HWPTAG_PARA_HEADER
+                    when HWPTAG::PARA_HEADER
                         if context.level <= @level
                             context.stack << context.tag_id
                             break
@@ -137,7 +155,7 @@ module HWP
                                 ParaHeader.new(context)
                             @ctrl_header.para_headers << para_header
                         end
-                    when :HWPTAG_LIST_HEADER
+                    when HWPTAG::LIST_HEADER
                         hierarchy_check(@level, context.level, __LINE__)
                         @ctrl_header.list_headers << Record::Section::
                             ListHeader.new(context)
@@ -201,7 +219,7 @@ module HWP
 
                     # 43쪽, 표 70, 표 개체 속성, 149쪽
                     case context.tag_id
-                    when :HWPTAG_TABLE
+                    when HWPTAG::TABLE
                         sio = StringIO.new context.data
 
                         unknown = sio.read(4)
@@ -227,7 +245,7 @@ module HWP
 
                         # row 만들기
                         @rows = Array.new(row_count).collect { Table::Row.new }
-                    when :HWPTAG_LIST_HEADER
+                    when HWPTAG::LIST_HEADER
                         #p context.data.to_formatted_hex
                         sio = StringIO.new context.data
                         ##
@@ -275,7 +293,7 @@ module HWP
                             raise # FIXME
                             @list_headers << list_header  # FIXME
                         end
-                    when :HWPTAG_PARA_HEADER
+                    when HWPTAG::PARA_HEADER
                         @rows[row_addr].cells[col_addr].para_headers <<
                             Record::Section::ParaHeader.new(context)
                     else
@@ -334,11 +352,11 @@ module HWP
                     end
 
                     case context.tag_id
-                    when :HWPTAG_CTRL_HEADER
+                    when HWPTAG::CTRL_HEADER
                         # CTRL_HEADER 가 끝이 나고 새롭게 시작됨을 알린다.
                         context.stack << context.tag_id
                         break
-                    when :HWPTAG_PARA_HEADER
+                    when HWPTAG::PARA_HEADER
                         if context.level <= @level
                             context.stack << context.tag_id
                             break
@@ -349,7 +367,7 @@ module HWP
                                 ParaHeader.new(context)
                             @ctrl_header.para_headers << para_header # FIXME
                         end
-                    when :HWPTAG_LIST_HEADER
+                    when HWPTAG::LIST_HEADER
                         hierarchy_check(@level, context.level, __LINE__)
                         @ctrl_header.list_headers << Record::Section:: # FIXME
                             ListHeader.new(context)
@@ -377,11 +395,11 @@ module HWP
                     end
 
                     case context.tag_id
-                    when :HWPTAG_CTRL_HEADER
+                    when HWPTAG::CTRL_HEADER
                         # CTRL_HEADER 가 끝이 나고 새롭게 시작됨을 알린다.
                         context.stack << context.tag_id
                         break
-                    when :HWPTAG_PARA_HEADER
+                    when HWPTAG::PARA_HEADER
                         if context.level <= @level
                             context.stack << context.tag_id
                             break
@@ -392,7 +410,7 @@ module HWP
                             para_header.parse(context)
                             @para_headers << para_header
                         end
-                    when :HWPTAG_FORM_OBJECT
+                    when HWPTAG::FORM_OBJECT
                         hierarchy_check(@level, context.level, __LINE__)
                     else
                         raise "unhandled " + context.tag_id.to_s
@@ -429,11 +447,11 @@ module HWP
                     end
 
                     case context.tag_id
-                    when :HWPTAG_CTRL_HEADER
+                    when HWPTAG::CTRL_HEADER
                         # CTRL_HEADER 가 끝이 나고 새롭게 시작됨을 알린다.
                         context.stack << context.tag_id
                         break
-                    when :HWPTAG_PARA_HEADER
+                    when HWPTAG::PARA_HEADER
                         if context.level <= @level
                             context.stack << context.tag_id
                             break
@@ -444,7 +462,7 @@ module HWP
                             para_header.parse(context)
                             @para_headers << para_header
                         end
-                    when :HWPTAG_EQEDIT
+                    when HWPTAG::EQEDIT
                         hierarchy_check(@level, context.level, __LINE__)
                         #@eq_edits << EqEdit.new(context)
                     else
@@ -454,7 +472,7 @@ module HWP
             end # parse
 
             def to_tag
-                "HWPTAG_EQEDIT"
+                "HWPTAG::EQEDIT"
             end
 
             def to_s
@@ -511,11 +529,11 @@ module HWP
                     end
 
                     case context.tag_id
-                    when :HWPTAG_CTRL_HEADER
+                    when HWPTAG::CTRL_HEADER
                         # CTRL_HEADER 가 끝이 나고 새롭게 시작됨을 알린다.
                         context.stack << context.tag_id
                         break
-                    when :HWPTAG_PARA_HEADER
+                    when HWPTAG::PARA_HEADER
                         if context.level <= @level
                             context.stack << context.tag_id
                             break
@@ -527,26 +545,26 @@ module HWP
                                 ParaHeader.new(context)
                             @ctrl_header.para_headers << para_header # FIXME
                         end
-                    when :HWPTAG_LIST_HEADER
+                    when HWPTAG::LIST_HEADER
                         # FIXME
                         #hierarchy_check(@level, context.level, __LINE__)
-                    when :HWPTAG_SHAPE_COMPONENT
+                    when HWPTAG::SHAPE_COMPONENT
                         # FIXME
                         #hierarchy_check(@level, context.level, __LINE__)
                         #@level += 1
-                    when :HWPTAG_SHAPE_COMPONENT_PICTURE
+                    when HWPTAG::SHAPE_COMPONENT_PICTURE
                         # FIXME
                         #hierarchy_check(@level, context.level, __LINE__)
-                    when :HWPTAG_SHAPE_COMPONENT_RECTANGLE
+                    when HWPTAG::SHAPE_COMPONENT_RECTANGLE
                         # FIXME
                         #hierarchy_check(@level, context.level, __LINE__)
-                    when :HWPTAG_SHAPE_COMPONENT_LINE
+                    when HWPTAG::SHAPE_COMPONENT_LINE
                         # FIXME
                         #hierarchy_check(@level, context.level, __LINE__)
-                    when :HWPTAG_SHAPE_COMPONENT_POLYGON
+                    when HWPTAG::SHAPE_COMPONENT_POLYGON
                         # FIXME
                         #hierarchy_check(@level, context.level, __LINE__)
-                    when :HWPTAG_SHAPE_COMPONENT_ELLIPSE
+                    when HWPTAG::SHAPE_COMPONENT_ELLIPSE
                         # FIXME
                         #hierarchy_check(@level, context.level, __LINE__)
                     else
