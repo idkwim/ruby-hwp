@@ -5,19 +5,11 @@ module Record
         attr_reader :document_properties, :id_mappings, :doc_data,
                     :distribute_doc_data, :reserved, :compatible_document
 
-        def initialize(dirent, header)
-            if header.compress?
-                z = Zlib::Inflate.new(-Zlib::MAX_WBITS)
-                s_io = StringIO.new(z.inflate dirent.read)
-                z.finish; z.close
-            else
-                s_io = StringIO.new(dirent.read)
-            end
-
+        def initialize(stream)
             @doc_data, @distribute_doc_data, @reserved, @compatible_document =
                 [], [], [], []
 
-            context = HWP::Context.new s_io
+            context = HWP::Context.new stream
 
             while context.has_next?
                 context.stack.empty? ? context.pull : context.stack.pop

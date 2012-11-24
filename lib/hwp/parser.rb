@@ -37,22 +37,8 @@ module HWP
         class BodyText
             attr_accessor :paragraphs
 
-            def initialize(dirent, header)
+            def initialize
                 @paragraphs = []
-
-                dirent.each_child do |section|
-                    if header.compress?
-                        z = Zlib::Inflate.new(-Zlib::MAX_WBITS)
-                        context = HWP::Context.new StringIO.new(z.inflate section.read)
-                        z.finish
-                        z.close
-                    else
-                        context = HWP::Context.new StringIO.new(section.read)
-                    end
-
-                    parse(context)
-                    #print_para_headers(self)
-                end # dirent.each_child
             end # initialize
 
             # <BodyText> ::= <Section>+
@@ -87,7 +73,7 @@ module HWP
         end # BodyText
 
         class ViewText
-            def initialize dirent, header
+            def initialize
                 raise NotImplementedError.new("ViewText is not supported")
             end
         end
@@ -98,7 +84,7 @@ module HWP
         end
 
         class BinData
-            def initialize(dirent, header)
+            def initialize(stream)
             end
         end
 
@@ -136,7 +122,7 @@ module HWP
         end
 
         class DocHistory
-            def initialize(dirent, header)
+            def initialize(dirent)
             end
         end
     end

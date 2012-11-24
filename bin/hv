@@ -181,7 +181,6 @@ class HwpViewer
 
         @vbox.add @scrolled_w
         @vbox.show_all
-        @document.close
     end
 end
 

@@ -49,63 +49,118 @@ end
 
 
 module HWP
-    class Document
-        attr_reader :file_header, :doc_info, :body_text, :view_text,
-                    :summary_info, :bin_data, :prv_text, :prv_image,
-                    :doc_options, :scripts, :xml_template, :doc_history
-
+    class File
+        attr_reader :header, :doc
         def initialize filename
-            @ole = Ole::Storage.open(filename, 'rb')
-            remain = @ole.dir.entries('/') - ['.', '..']
+            ole = Ole::Storage.open(filename, 'rb')
+            remain = ole.dir.entries('/') - ['.', '..']
             # 스펙이 명확하지 않고, 추후 스펙이 변할 수 있기 때문에
             # 이를 감지하고자 코드를 이렇게 작성하였다.
             root_entries = [ "FileHeader", "DocInfo", "BodyText", "ViewText",
                         "\005HwpSummaryInformation", "BinData", "PrvText", "PrvImage",
                         "DocOptions", "Scripts", "XMLTemplate", "DocHistory" ]
 
+            @doc = Document.new
+
             root_entries.each do |entry|
-                case @ole.file.file? entry
+                case ole.file.file? entry
                 when true  # file
-                    file = @ole.file.open entry
+                    file = ole.file.open entry
                 when false # dir
-                    dirent = @ole.dirent_from_path entry
+                    dirent = ole.dirent_from_path entry
                 when nil   # nothing
                     next
                 end
 
                 case entry
-                when "FileHeader" then @file_header = FileHeader.new file
+                when "FileHeader"
+                    @header = FileHeader.new file
                 when "DocInfo"
-                    @doc_info = Record::DocInfo.new(file, @file_header)
+                    if header.compress?
+                        # TODO handling by stream
+                        z = Zlib::Inflate.new(-Zlib::MAX_WBITS)
+                        s_io = StringIO.new(z.inflate file.read)
+                        z.finish
+                        z.close
+                    else
+                        s_io = StringIO.new(file.read)
+                    end
+                    @doc.info = Record::DocInfo.new(s_io)
+                    s_io.close
                 when "BodyText"
-                    @body_text = HWP::Parser::BodyText.new(dirent, @file_header)
+                    body_text = HWP::Parser::BodyText.new
+                    dirent.each_child do |section|
+                        # TODO handling by stream
+                        if header.compress?
+                            z = Zlib::Inflate.new(-Zlib::MAX_WBITS)
+                            s_io = StringIO.new(z.inflate section.read)
+                            z.finish
+                            z.close
+                        else
+                            s_io = StringIO.new(section.read)
+                        end
+                        context = HWP::Context.new(s_io)
+                        body_text.parse(context)
+                        s_io.close
+                    end
+                    @doc.body_text = body_text
                 when "ViewText"
-                    @view_text = Record::ViewText.new(dirent, @file_header)
+                    view_text = HWP::Parser::BodyText.new
+                    dirent.each_child do |section|
+                        if header.compress?
+                            z = Zlib::Inflate.new(-Zlib::MAX_WBITS)
+                            s_io = StringIO.new(z.inflate section.read)
+                            z.finish
+                            z.close
+                        else
+                            s_io = StringIO.new(section.read)
+                        end
+                        context = HWP::Context.new(s_io)
+                        view_text.parse(context)
+                        s_io.close
+                    end
+                    @doc.view_text = view_text
                 when "\005HwpSummaryInformation"
-                    @summary_info = HWP::Parser::SummaryInformation.new file
+                    @doc.summary_info = HWP::Parser::SummaryInformation.new file
                 when "BinData"
-                    @bin_data = Record::BinData.new(dirent, @file_header)
+                    if header.compress?
+                        # TODO handling by stream
+                        z = Zlib::Inflate.new(-Zlib::MAX_WBITS)
+                        s_io = StringIO.new(z.inflate file.read)
+                        z.finish
+                        z.close
+                    else
+                        s_io = StringIO.new(file.read)
+                    end
+                    @doc.bin_data = Record::BinData.new(s_io)
+                    s_io.close
                 when "PrvText"
-                    @prv_text = HWP::Parser::PrvText.new file
+                    @doc.prv_text = HWP::Parser::PrvText.new file
                 when "PrvImage"
-                    @prv_image = HWP::Parser::PrvImage.new file
+                    @doc.prv_image = HWP::Parser::PrvImage.new file
                 when "DocOptions"
-                    @doc_options = HWP::Parser::DocOptions.new dirent
+                    @doc.options = HWP::Parser::DocOptions.new dirent
                 when "Scripts"
-                    @scripts = HWP::Parser::Scripts.new dirent
+                    @doc.scripts = HWP::Parser::Scripts.new dirent
                 when "XMLTemplate"
-                    @xml_template = Record::XMLTemplate.new dirent
+                    @doc.xml_template = Record::XMLTemplate.new dirent
                 when "DocHistory"
-                    @doc_history =
-                        Record::DocHistory.new(dirent, @file_header)
+                    @doc.history = Record::DocHistory.new(dirent)
                 else raise "unknown entry"
                 end
                 # 스펙에 앖는 것을 감지하기 위한 코드
                 remain = remain - [entry]
             end # root_entries.each
 
+            ole.close
             raise "unknown entry" unless remain.empty?
         end
+    end
+
+    class Document
+        attr_accessor :info, :body_text, :view_text, :summary_info, :bin_data,
+                      :prv_text, :prv_image, :options, :scripts, :xml_template,
+                      :history
 
         # 아래는 렌더링에 관련된 함수이다.
         def get_page n
@@ -145,10 +200,6 @@ module HWP
                 @pages[@n_pages] ||= Page.new(page_def.width / 100.0, page_def.height / 100.0)
                 @pages[@n_pages].layouts << layout
             end
-        end
-
-        def close
-            @ole.close
         end
     end # Document
 

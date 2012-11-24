@@ -6,6 +6,7 @@ require 'hwp/document.rb'
 
 module HWP
     def self.open filename
-        Document.new filename
+        hwpfile = HWP::File.new filename
+        hwpfile.doc
     end
 end
