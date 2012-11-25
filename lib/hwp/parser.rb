@@ -36,11 +36,10 @@ module HWP
         end
 
         def record_header_decode
-            l = (@stream.read 4).unpack("V")[0]
-            @tag_id = l & 0x3ff
-            @level  = (l >> 10) & 0x3ff
-            size    = (l >> 20) & 0xfff
-
+            header  = (@stream.read 4).unpack("V")[0]
+            @tag_id =  header & 0x3ff
+            @level  = (header >> 10) & 0x3ff
+            size    = (header >> 20) & 0xfff
             @data = @stream.read size
         end
 
