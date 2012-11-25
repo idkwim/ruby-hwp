@@ -40,6 +40,9 @@ module HWP
             @tag_id =  header & 0x3ff
             @level  = (header >> 10) & 0x3ff
             size    = (header >> 20) & 0xfff
+            if size == 0xfff
+                size = (@stream.read 4).unpack("V")[0]
+            end
             @data = @stream.read size
         end
 
