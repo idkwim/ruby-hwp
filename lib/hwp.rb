@@ -24,7 +24,7 @@ require 'hwp/document.rb'
 
 module HWP
     def self.open filename
-        hwpfile = HWP::File.new filename
+        hwpfile = HWP::HWPFile.new filename
         hwpfile.doc
     end
 end

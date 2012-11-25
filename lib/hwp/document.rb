@@ -68,7 +68,7 @@ end
 
 
 module HWP
-    class File
+    class HWPFile
         attr_reader :header, :doc
         def initialize filename
             ole = Ole::Storage.open(filename, 'rb')
