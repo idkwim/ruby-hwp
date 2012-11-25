@@ -73,26 +73,6 @@ module HWPTAG
     MEMO_LIST                 =  93
     CHART_DATA                =  95
     SHAPE_COMPONENT_UNKNOWN   = 115
-
-    # 알려지지 않은 태그인가 ??
-    # https://groups.google.com/forum/#!msg/libhwp/fpnsqz5i_W0/ErxIq-OV81MJ
-    UNKNOWN_TAG_0   =   0
-    UNKNOWN_TAG_1   =   1
-    UNKNOWN_TAG_3   =   3
-    UNKNOWN_TAG_4   =   4
-    UNKNOWN_TAG_58  =  58
-    UNKNOWN_TAG_172 = 172
-    UNKNOWN_TAG_190 = 190
-    UNKNOWN_TAG_199 = 199
-    UNKNOWN_TAG_256 = 256
-    UNKNOWN_TAG_257 = 257
-    UNKNOWN_TAG_288 = 288
-    UNKNOWN_TAG_512 = 512
-    UNKNOWN_TAG_520 = 520
-    UNKNOWN_TAG_560 = 560
-    UNKNOWN_TAG_652 = 652
-    UNKNOWN_TAG_710 = 710
-    UNKNOWN_TAG_888 = 888
 end
 
 module HISTORY_RECORD_TYPE
