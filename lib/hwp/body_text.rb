@@ -103,19 +103,6 @@ module Record::Section
                 #    else
                 #        raise "unhandled " + context.tag_id.to_s
                 #    end
-                #when HWPTAG::UNKNOWN_TAG_0
-                #when HWPTAG::UNKNOWN_TAG_4
-                #when HWPTAG::UNKNOWN_TAG_172
-                #when HWPTAG::UNKNOWN_TAG_190
-                #when HWPTAG::UNKNOWN_TAG_199
-                #when HWPTAG::UNKNOWN_TAG_257
-                #when HWPTAG::UNKNOWN_TAG_288
-                #when HWPTAG::UNKNOWN_TAG_512
-                #when HWPTAG::UNKNOWN_TAG_520
-                #when HWPTAG::UNKNOWN_TAG_560
-                #when HWPTAG::UNKNOWN_TAG_652
-                #when HWPTAG::UNKNOWN_TAG_710
-                #when HWPTAG::UNKNOWN_TAG_888
                 #when HWPTAG::DOC_INFO_32
                 else
                     raise "unhandled " + context.tag_id.to_s
