@@ -222,24 +222,24 @@ module HWP
                     when HWPTAG::TABLE
                         sio = StringIO.new context.data
 
-                        unknown = sio.read(4)
-                        row_count    = sio.read(2).unpack("v")[0]
-                        col_count    = sio.read(2).unpack("v")[0]
-                        cell_spacing = sio.read(2).unpack("v")[0]
+                        flags          = sio.read(4) # 표 71 속성
+                        row_count      = sio.read(2).unpack("v")[0]
+                        col_count      = sio.read(2).unpack("v")[0]
+                        cell_spacing   = sio.read(2).unpack("v")[0]
                         # margin
-                        left_margin  = sio.read(2).unpack("v")[0]
-                        right_margin = sio.read(2).unpack("v")[0]
-                        top_margin    = sio.read(2).unpack("v")[0]
+                        left_margin    = sio.read(2).unpack("v")[0]
+                        right_margin   = sio.read(2).unpack("v")[0]
+                        top_margin     = sio.read(2).unpack("v")[0]
                         bottom_margin  = sio.read(2).unpack("v")[0]
 
-                        row_size = sio.read(2 * row_count).unpack("v*")
+                        row_sizes = sio.read(2 * row_count).unpack("v*")
                         border_fill_id = sio.read(2).unpack("v")[0]
                         unless sio.eof?
-							valid_zone_info_size = sio.read(2).unpack("v")[0]
-							unless sio.eof?
-								sio.close
-								raise "data size mismatch"
-							end
+                            valid_zone_info_size = sio.read(2).unpack("v")[0]
+                            unless sio.eof?
+                                sio.close
+                                raise "data size mismatch"
+                            end
                         end
                         sio.close
 
