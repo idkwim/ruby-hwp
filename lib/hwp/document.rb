@@ -142,17 +142,7 @@ module HWP
                 when "\005HwpSummaryInformation"
                     @doc.summary_info = HWP::Parser::SummaryInformation.new file
                 when "BinData"
-                    if header.compress?
-                        # TODO handling by stream
-                        z = Zlib::Inflate.new(-Zlib::MAX_WBITS)
-                        s_io = StringIO.new(z.inflate file.read)
-                        z.finish
-                        z.close
-                    else
-                        s_io = StringIO.new(file.read)
-                    end
-                    @doc.bin_data = Record::BinData.new(s_io)
-                    s_io.close
+                    # TODO
                 when "PrvText"
                     @doc.prv_text = HWP::Parser::PrvText.new file
                 when "PrvImage"
