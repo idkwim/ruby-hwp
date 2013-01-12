@@ -250,9 +250,8 @@ module HWP
                         sio = StringIO.new context.data
                         ##
                         para_count = sio.read(2).unpack("v")[0]
-                        sio.read(2).unpack("v")[0]
-                        sio.read(2).unpack("v")[0]
-                        sio.read(2).unpack("v")[0]
+                        flags      = sio.read(4).unpack("v")[0]
+                        unknown    = sio.read(2).unpack("v")[0]
                         ##
                         col_addr = sio.read(2).unpack("v")[0]
                         row_addr = sio.read(2).unpack("v")[0]
