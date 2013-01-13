@@ -181,7 +181,7 @@ module HWP
         end # PageHiding
 
         #class Table
-        #    attr_accessor :page_break, :repeat_header, :row_count, :col_count,
+        #    attr_accessor :page_break, :repeat_header, :n_rows, :n_cols,
         #                  :cell_spacing, :border_fill
         #end
 
@@ -222,17 +222,17 @@ module HWP
                     when HWPTAG::TABLE
                         sio = StringIO.new context.data
 
-                        flags          = sio.read(4) # 표 71 속성
-                        row_count      = sio.read(2).unpack("v")[0]
-                        col_count      = sio.read(2).unpack("v")[0]
-                        cell_spacing   = sio.read(2).unpack("v")[0]
+                        flags         = sio.read(4) # 표 71 속성
+                        n_rows        = sio.read(2).unpack("v")[0]
+                        n_cols        = sio.read(2).unpack("v")[0]
+                        cell_spacing  = sio.read(2).unpack("v")[0]
                         # margin
-                        left_margin    = sio.read(2).unpack("v")[0]
-                        right_margin   = sio.read(2).unpack("v")[0]
-                        top_margin     = sio.read(2).unpack("v")[0]
-                        bottom_margin  = sio.read(2).unpack("v")[0]
+                        left_margin   = sio.read(2).unpack("v")[0]
+                        right_margin  = sio.read(2).unpack("v")[0]
+                        top_margin    = sio.read(2).unpack("v")[0]
+                        bottom_margin = sio.read(2).unpack("v")[0]
 
-                        row_sizes = sio.read(2 * row_count).unpack("v*")
+                        row_sizes = sio.read(2 * n_rows).unpack("v*")
                         border_fill_id = sio.read(2).unpack("v")[0]
                         unless sio.eof?
                             valid_zone_info_size = sio.read(2).unpack("v")[0]
@@ -244,7 +244,7 @@ module HWP
                         sio.close
 
                         # row 만들기
-                        @rows = Array.new(row_count).collect { Table::Row.new }
+                        @rows = Array.new(n_rows).collect { Table::Row.new }
                     when HWPTAG::LIST_HEADER
                         #p context.data.to_formatted_hex
                         sio = StringIO.new context.data

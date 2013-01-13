@@ -478,16 +478,16 @@ module Record::Section
 
     # TODO REVERSE-ENGINEERING
     class Table
-        attr_reader :level, :prop, :row_count, :col_count, :cell_spacing, :margins, :row_size, :border_fill_id
+        attr_reader :level, :prop, :n_rows, :n_cols, :cell_spacing, :margins, :row_size, :border_fill_id
         def initialize context
             @level = context.level
             s_io = StringIO.new context.data
             @prop = s_io.read(4).unpack("V")
-            @row_count = s_io.read(2).unpack("v")[0]
-            @col_count = s_io.read(2).unpack("v")[0]
+            @n_rows = s_io.read(2).unpack("v")[0]
+            @n_cols = s_io.read(2).unpack("v")[0]
             @cell_spacing = s_io.read(2).unpack("v")
             @margins = s_io.read(2*4).unpack("v4")
-            @row_size = s_io.read(2*row_count).unpack("v*")
+            @row_size = s_io.read(2*n_rows).unpack("v*")
             @border_fill_id = s_io.read(2).unpack("v")
             #valid_zone_info_size = s_io.read(2).unpack("v")[0]
             #zone_prop = s_io.read(10*valid_zone_info_size).unpack("v*")
