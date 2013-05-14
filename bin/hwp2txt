@@ -42,6 +42,10 @@ ole.dir.entries('BodyText').each do |f|
             record_id = i & 0x3ff
             record_size = (i >> 20) & 0xfff
 
+            if record_size == 0xfff
+                record_size = (buf.read 4).unpack("V")[0]
+            end 
+
             if record_id == 67
                 data = buf.read(record_size)
 
