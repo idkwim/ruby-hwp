@@ -337,6 +337,9 @@ def hwp_v3_to_txt file
             when 25 # 제목/표/그림차례 표시
                 n_chars_read += 2
                 stream.pos   += 4
+            when 28 # 개요 모양/번호
+                n_chars_read += 31
+                stream.pos   += 62
             when 30, 31
                 n_chars_read += 1
                 stream.pos   += 2
