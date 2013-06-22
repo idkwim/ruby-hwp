@@ -276,8 +276,9 @@ def hwp_v3_to_txt file
 
             case i # unsigned integer(2-byte) little endian
             when 6 # 책갈피
-                n_chars_read += 20
-                stream.pos   += 40
+                n_chars_read += 3
+                stream.pos   += 6
+                stream.pos   += 34
             when 9 # tab
                 n_chars_read += 3
                 stream.pos   += 6
@@ -328,13 +329,13 @@ def hwp_v3_to_txt file
                 stream.pos   += 14
                 while(parse_paragraph(stream))
                 end
-            when 18..20
+            when 18..21
                 n_chars_read += 3
                 stream.pos   += 6
             when 23 # 글자 겹침
                 n_chars_read += 4
                 stream.pos   += 8
-            when 25 # 제목/표/그림차례 표시
+            when 24, 25
                 n_chars_read += 2
                 stream.pos   += 4
             when 28 # 개요 모양/번호
