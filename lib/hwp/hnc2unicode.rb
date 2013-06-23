@@ -17087,3 +17087,52 @@ HNC2UNICODE = {
 	0xbc1f => [0x1105, 0x1173, 0x11dd],	# 르ᇝ
 	0xd802 => [0x110b, 0x1161, 0x11c7],	# 아ᇇ
 }
+
+def make_db_file
+    require 'gdbm'
+    gdbm = GDBM.new("hnc2unicode.db")
+
+    HNC2UNICODE.each_pair do |k, v|
+        if v.class == Fixnum
+            gdbm[[k].pack("v*")] = [v].pack("U*")
+        elsif v.class == Array
+            gdbm[[k].pack("v*")] = v.pack("U*")
+        else
+            raise NotImplementedError.new("#{v.class.name}")
+        end
+    end
+
+    gdbm.close
+end
+
+def make_switch_case_for_c
+puts "#include <glib.h>
+#include \"hnc2unicode.h\"
+
+gchar *hnc_to_utf8 (guint16 c)
+{
+    GString *string = g_string_new (NULL);
+
+    switch (c) {"
+
+    HNC2UNICODE.each_pair do |k, v|
+        if v.class == Fixnum
+            puts "        case #{sprintf("0x%04x", k)}: g_string_append_unichar (string, #{sprintf("0x%04x", v)}); break;"
+        elsif v.class == Array
+            puts "        case #{sprintf("0x%04x", k)}:\t/* #{v.pack("U*")} */"
+            v.each do |n|
+                puts "            g_string_append_unichar (string, #{sprintf("0x%04x", n)});"
+            end
+            puts "            break;"
+        end
+    end
+
+puts "        default:
+            g_string_free (string, TRUE);
+            return NULL;
+            break;
+    }
+    return g_string_free (string, FALSE);
+}"
+
+end
