@@ -184,6 +184,56 @@ HNC_T2 = [0x11d9,    nil, 0x11a8, 0x11a9, 0x11aa, 0x11ab, 0x11ac, 0x11ad,
           0x11b6, 0x11b7, 0x11e6, 0x11b8, 0x11b9, 0x11ba, 0x11bb, 0x11bc,
           0x11bd, 0x11be, 0x11bf, 0x11c0, 0x11c1, 0x11c2, 0x11eb, 0x11f0]
 
+def hnc_to_utf8 c
+    case c
+    when 0x0020..0x7fff
+        begin
+            print [HNC2UNICODE[c]].pack("U")
+        rescue
+            raise NotImplementedError.new("HNC code: 0x#{c.to_s(16)}")
+        end
+    when 0x8000..0xffff # 조합 한글 영역
+        l = (c & 0x7c00) >> 10 # 초성
+        v = (c & 0x03e0) >> 5  # 중성
+        t = (c & 0x001f)       # 종성
+
+        begin
+            # 조합형 현대 한글 음절(11172)을 유니코드로 변환
+            syllable = 0xac00 + (L_MAP[l] * 21 * 28) +
+                                (V_MAP[v] * 28) + T_MAP[t]
+            print [syllable].pack("U")
+        rescue
+            # 초성만 존재하는 경우 유니코드 한글 호환 자모로 변환
+            if HNC_L1[v] and HNC_V1[v].nil? and HNC_T1[t].nil?
+                print HNC_L1[l]
+            # 중성만 존재하는 경우 유니코드 한글 호환 자모로 변환
+            elsif HNC_L1[l].nil? and HNC_V1[v] and HNC_T1[t].nil?
+                print HNC_V1[v]
+            # 종성만 존재하는 경우 유니코드 한글 호환 자모로 변환
+            elsif HNC_L1[l].nil? and HNC_V1[v].nil? and HNC_T1[t]
+                print HNC_T1[t]
+            # 초성과 중성만 존재하는 조합형 옛한글의 경우
+            elsif HNC_L2[v] and HNC_V2[v] and HNC_T2[t].nil?
+                print [HNC_L2[l], HNC_V2[v]].pack("U*")
+            # 초성, 중성, 종성 모두 존재하는 조합형 옛한글의 경우
+            elsif HNC_L2[v] and HNC_V2[v] and HNC_T2[t]
+                print [HNC_L2[l], HNC_V2[v], HNC_T2[t]].pack("U*")
+            # 완성형 옛한글
+            elsif v.zero?
+                if HNC2UNICODE[c]
+                    print HNC2UNICODE[c].pack("U*")
+                else
+                    raise NotImplementedError.new("HNC code: 0x#{c.to_s(16)} (l:#{l} v:#{v} t:#{t})")
+                end
+            else
+                raise NotImplementedError.new("HNC code: 0x#{c.to_s(16)} (l:#{l} v:#{v} t:#{t})")
+            end
+        end
+    else
+        raise RangeError.new("0x#{c.to_s(16)}: out of hnc code range")
+    end
+end
+
 def hwp_v3_to_txt file
     begin
         require 'hwp/hnc2unicode'
@@ -344,54 +394,10 @@ def hwp_v3_to_txt file
             when 30, 31
                 n_chars_read += 1
                 stream.pos   += 2
-            when 0x0020..0x7fff
-                begin
-                    print [HNC2UNICODE[c]].pack("U")
-                rescue
-                    raise NotImplementedError.new("HNC code: 0x#{c.to_s(16)}")
-                end
-            when 0x8000..0xffff # 조합 한글 영역
-                l = (c & 0x7c00) >> 10 # 초성
-                v = (c & 0x03e0) >> 5  # 중성
-                t = (c & 0x001f)       # 종성
-
-                begin
-                    # 조합형 현대 한글 음절(11172)을 유니코드로 변환
-                    syllable = 0xac00 + (L_MAP[l] * 21 * 28) +
-                                        (V_MAP[v] * 28) + T_MAP[t]
-                    print [syllable].pack("U")
-                rescue
-                    # 초성만 존재하는 경우 유니코드 한글 호환 자모로 변환
-                    if HNC_L1[v] and HNC_V1[v].nil? and HNC_T1[t].nil?
-                        print HNC_L1[l]
-                        next
-                    # 중성만 존재하는 경우 유니코드 한글 호환 자모로 변환
-                    elsif HNC_L1[l].nil? and HNC_V1[v] and HNC_T1[t].nil?
-                        print HNC_V1[v]
-                        next
-                    # 종성만 존재하는 경우 유니코드 한글 호환 자모로 변환
-                    elsif HNC_L1[l].nil? and HNC_V1[v].nil? and HNC_T1[t]
-                        print HNC_T1[t]
-                        next
-                    # 초성과 중성만 존재하는 조합형 옛한글의 경우
-                    elsif HNC_L2[v] and HNC_V2[v] and HNC_T2[t].nil?
-                        print [HNC_L2[l], HNC_V2[v]].pack("U*")
-                    # 초성, 중성, 종성 모두 존재하는 조합형 옛한글의 경우
-                    elsif HNC_L2[v] and HNC_V2[v] and HNC_T2[t]
-                        print [HNC_L2[l], HNC_V2[v], HNC_T2[t]].pack("U*")
-                    # 완성형 옛한글
-                    elsif v.zero?
-                        if HNC2UNICODE[c]
-                            print HNC2UNICODE[c].pack("U*")
-                        else
-                            raise NotImplementedError.new("HNC code: 0x#{c.to_s(16)} (l:#{l} v:#{v} t:#{t})")
-                        end
-                    else
-                        raise NotImplementedError.new("HNC code: 0x#{c.to_s(16)} (l:#{l} v:#{v} t:#{t})")
-                    end
-                end
+            when 0x0020..0xffff # hnc code range
+                hnc_to_utf8 (c)
             else
-                raise NotImplementedError.new("HNC code: 0x#{c.to_s(16)}")
+                raise NotImplementedError.new("special character: 0x#{c.to_s(16)}")
             end
         end
         true
