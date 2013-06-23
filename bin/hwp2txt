@@ -271,10 +271,10 @@ def hwp_v3_to_txt file
         n_chars_read = 0
 
         while(n_chars_read < n_chars)
-            i = stream.read_uint16 # 2바이트씩 읽는다.
+            c = stream.read_uint16 # 2바이트씩 읽는다.
             n_chars_read += 1
 
-            case i # unsigned integer(2-byte) little endian
+            case c # unsigned integer(2-byte) little endian
             when 6 # 책갈피
                 n_chars_read += 3
                 stream.pos   += 6
@@ -296,7 +296,7 @@ def hwp_v3_to_txt file
 
                 # <셀 문단 리스트>+
                 (n_cells).times do |i|
-                    #<셀 문단 리스트> ::= <셀 문단>+ <빈문단>
+                    # <셀 문단 리스트> ::= <셀 문단>+ <빈문단>
                     while(parse_paragraph(stream))
                     end
                 end
@@ -346,14 +346,14 @@ def hwp_v3_to_txt file
                 stream.pos   += 2
             when 0x0020..0x7fff
                 begin
-                    print [HNC2UNICODE[i]].pack("U")
+                    print [HNC2UNICODE[c]].pack("U")
                 rescue
-                    raise NotImplementedError.new("HNC code: 0x#{i.to_s(16)}")
+                    raise NotImplementedError.new("HNC code: 0x#{c.to_s(16)}")
                 end
             when 0x8000..0xffff # 조합 한글 영역
-                l = (i & 0x7c00) >> 10 # 초성
-                v = (i & 0x03e0) >> 5  # 중성
-                t = (i & 0x001f)       # 종성
+                l = (c & 0x7c00) >> 10 # 초성
+                v = (c & 0x03e0) >> 5  # 중성
+                t = (c & 0x001f)       # 종성
 
                 begin
                     # 조합형 현대 한글 음절(11172)을 유니코드로 변환
@@ -381,24 +381,24 @@ def hwp_v3_to_txt file
                         print [HNC_L2[l], HNC_V2[v], HNC_T2[t]].pack("U*")
                     # 완성형 옛한글
                     elsif v.zero?
-                        if HNC2UNICODE[i]
-                            print HNC2UNICODE[i].pack("U*")
+                        if HNC2UNICODE[c]
+                            print HNC2UNICODE[c].pack("U*")
                         else
-                            raise NotImplementedError.new("HNC code: 0x#{i.to_s(16)} (l:#{l} v:#{v} t:#{t})")
+                            raise NotImplementedError.new("HNC code: 0x#{c.to_s(16)} (l:#{l} v:#{v} t:#{t})")
                         end
                     else
-                        raise NotImplementedError.new("HNC code: 0x#{i.to_s(16)} (l:#{l} v:#{v} t:#{t})")
+                        raise NotImplementedError.new("HNC code: 0x#{c.to_s(16)} (l:#{l} v:#{v} t:#{t})")
                     end
                 end
             else
-                raise NotImplementedError.new("HNC code: 0x#{i.to_s(16)}")
+                raise NotImplementedError.new("HNC code: 0x#{c.to_s(16)}")
             end
         end
         true
     end
 
     def parse(stream)
-        #<문단 리스트> ::= <문단>+ <빈문단>
+        # <문단 리스트> ::= <문단>+ <빈문단>
         while(!stream.eof? and parse_paragraph(stream))
         end
     end
